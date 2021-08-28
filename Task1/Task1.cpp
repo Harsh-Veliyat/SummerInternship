@@ -12,14 +12,14 @@ struct RBT_Node {
 	Color color; 
 };
 
-typedef RBT_Node* nptr;
+typedef RBT_Node* rbtPtr;
 
 class RBTree {
 private:
-	nptr root;
-	nptr NullNode;
+	rbtPtr root;
+	rbtPtr NullNode;
 
-	void printPreOrder(nptr node) {
+	void printPreOrder(rbtPtr node) {
 		if (node != NullNode) {
 			cout << node->val << " ";
 			printPreOrder(node->lchild);
@@ -27,7 +27,7 @@ private:
 		}
 	}
 
-	void printInOrder(nptr node) {
+	void printInOrder(rbtPtr node) {
 		if (node != NullNode) {
 			printInOrder(node->lchild);
 			cout << node->val << " ";
@@ -35,7 +35,7 @@ private:
 		}
 	}
 
-	void printPostOrder(nptr node) {
+	void printPostOrder(rbtPtr node) {
 		if (node != NullNode) {
 			printPostOrder(node->lchild);
 			printPostOrder(node->rchild);
@@ -43,7 +43,7 @@ private:
 		}
 	}
 
-	nptr findVal(nptr node, int key) {
+	rbtPtr findVal(rbtPtr node, int key) {
 		if (node == NullNode || key == node->val) {
 			return node;
 		}
@@ -54,13 +54,12 @@ private:
 		return findVal(node->rchild, key);
 	}
 
-	void fixDelete(nptr x) {
-		nptr s;
+	void fixDelete(rbtPtr x) {
+		rbtPtr s;
 		while (x != root && x->color == black) {
 			if (x == x->parent->lchild) {
 				s = x->parent->rchild;
 				if (s->color == red) {
-					// case 3.1
 					s->color = black;
 					x->parent->color = red;
 					leftRotate(x->parent);
@@ -68,20 +67,16 @@ private:
 				}
 
 				if (s->lchild->color == black && s->rchild->color == black) {
-					// case 3.2
 					s->color = red;
 					x = x->parent;
 				}
 				else {
 					if (s->rchild->color == black) {
-						// case 3.3
 						s->lchild->color = black;
 						s->color = red;
 						rightRotate(s);
 						s = x->parent->rchild;
 					}
-
-					// case 3.4
 					s->color = x->parent->color;
 					x->parent->color = black;
 					s->rchild->color = black;
@@ -92,7 +87,6 @@ private:
 			else {
 				s = x->parent->lchild;
 				if (s->color == red) {
-					// case 3.1
 					s->color = black;
 					x->parent->color = red;
 					rightRotate(x->parent);
@@ -100,20 +94,16 @@ private:
 				}
 
 				if (s->lchild->color == black && s->rchild->color == black) {
-					// case 3.2
 					s->color = red;
 					x = x->parent;
 				}
 				else {
 					if (s->lchild->color == black) {
-						// case 3.3
 						s->rchild->color = black;
 						s->color = red;
 						leftRotate(s);
 						s = x->parent->lchild;
 					}
-
-					// case 3.4
 					s->color = x->parent->color;
 					x->parent->color = black;
 					s->lchild->color = black;
@@ -126,7 +116,7 @@ private:
 	}
 
 
-	void rbTransplant(nptr u, nptr v) {
+	void rbTransplant(rbtPtr u, rbtPtr v) {
 		if (u->parent == nullptr) {
 			root = v;
 		}
@@ -139,10 +129,9 @@ private:
 		v->parent = u->parent;
 	}
 
-	void deleteNode(nptr node, int key) {
-		// find the node containing key
-		nptr z = NullNode;
-		nptr x, y;
+	void deleteNode(rbtPtr node, int key) {
+		rbtPtr z = NullNode;
+		rbtPtr x, y;
 		while (node != NullNode) {
 			if (node->val == key) {
 				z = node;
@@ -195,13 +184,12 @@ private:
 		}
 	}
 
-	void fixInsert(nptr k) {
-		nptr u;
+	void fixInsert(rbtPtr k) {
+		rbtPtr u;
 		while (k->parent->color == red) {
 			if (k->parent == k->parent->parent->rchild) {
-				u = k->parent->parent->lchild; // uncle
+				u = k->parent->parent->lchild;
 				if (u->color == red) {
-					// case 3.1
 					u->color = black;
 					k->parent->color = black;
 					k->parent->parent->color = red;
@@ -209,21 +197,18 @@ private:
 				}
 				else {
 					if (k == k->parent->lchild) {
-						// case 3.2.2
 						k = k->parent;
 						rightRotate(k);
 					}
-					// case 3.2.1
 					k->parent->color = black;
 					k->parent->parent->color = red;
 					leftRotate(k->parent->parent);
 				}
 			}
 			else {
-				u = k->parent->parent->rchild; // uncle
+				u = k->parent->parent->rchild; 
 
 				if (u->color == red) {
-					// mirror case 3.red
 					u->color = black;
 					k->parent->color = black;
 					k->parent->parent->color = red;
@@ -231,11 +216,9 @@ private:
 				}
 				else {
 					if (k == k->parent->rchild) {
-						// mirror case 3.2.2
 						k = k->parent;
 						leftRotate(k);
 					}
-					// mirror case 3.2.1
 					k->parent->color = black;
 					k->parent->parent->color = red;
 					rightRotate(k->parent->parent);
@@ -248,7 +231,46 @@ private:
 		root->color = black;
 	}
 
-	void printT(nptr root, string indent, bool last) {
+	void leftRotate(rbtPtr x) {
+		rbtPtr y = x->rchild;
+		x->rchild = y->lchild;
+		if (y->lchild != NullNode) {
+			y->lchild->parent = x;
+		}
+		y->parent = x->parent;
+		if (x->parent == nullptr) {
+			this->root = y;
+		}
+		else if (x == x->parent->lchild) {
+			x->parent->lchild = y;
+		}
+		else {
+			x->parent->rchild = y;
+		}
+		y->lchild = x;
+		x->parent = y;
+	}
+
+	void rightRotate(rbtPtr x) {
+		rbtPtr y = x->lchild;
+		x->lchild = y->rchild;
+		if (y->rchild != NullNode) {
+			y->rchild->parent = x;
+		}
+		y->parent = x->parent;
+		if (x->parent == nullptr) {
+			this->root = y;
+		}
+		else if (x == x->parent->rchild) {
+			x->parent->rchild = y;
+		}
+		else {
+			x->parent->lchild = y;
+		}
+		y->rchild = x;
+		x->parent = y;
+	}
+	void printT(rbtPtr root, string indent, bool last) {
 		// print the tree structure on the screen
 		if (root != NullNode) {
 			cout << indent;
@@ -290,68 +312,28 @@ public:
 		printPostOrder(this->root);
 	}
 
-	nptr searchTree(int k) {
+	rbtPtr searchTree(int k) {
 		return findVal(this->root, k);
 	}
 
-	nptr minimum(nptr node) {
+	rbtPtr minimum(rbtPtr node) {
 		while (node->lchild != NullNode) {
 			node = node->lchild;
 		}
 		return node;
 	}
 
-	void leftRotate(nptr x) {
-		nptr y = x->rchild;
-		x->rchild = y->lchild;
-		if (y->lchild != NullNode) {
-			y->lchild->parent = x;
-		}
-		y->parent = x->parent;
-		if (x->parent == nullptr) {
-			this->root = y;
-		}
-		else if (x == x->parent->lchild) {
-			x->parent->lchild = y;
-		}
-		else {
-			x->parent->rchild = y;
-		}
-		y->lchild = x;
-		x->parent = y;
-	}
-
-	void rightRotate(nptr x) {
-		nptr y = x->lchild;
-		x->lchild = y->rchild;
-		if (y->rchild != NullNode) {
-			y->rchild->parent = x;
-		}
-		y->parent = x->parent;
-		if (x->parent == nullptr) {
-			this->root = y;
-		}
-		else if (x == x->parent->rchild) {
-			x->parent->rchild = y;
-		}
-		else {
-			x->parent->lchild = y;
-		}
-		y->rchild = x;
-		x->parent = y;
-	}
-
 	void insert(int key) {
 
-		nptr node = new RBT_Node;
+		rbtPtr node = new RBT_Node;
 		node->parent = nullptr;
 		node->val = key;
 		node->lchild = NullNode;
 		node->rchild = NullNode;
 		node->color = red; 
 
-		nptr y = nullptr;
-		nptr x = this->root;
+		rbtPtr y = nullptr;
+		rbtPtr x = this->root;
 
 		while (x != NullNode) {
 			y = x;
@@ -385,7 +367,7 @@ public:
 		fixInsert(node);
 	}
 
-	nptr getRoot() {
+	rbtPtr getRoot() {
 		return this->root;
 	}
 
@@ -406,15 +388,16 @@ int main() {
 	rbtree.insert(18);
 	rbtree.insert(6);
 	rbtree.insert(20);
-	rbtree.insert(3);
+	rbtree.insert(3);  
 	rbtree.insert(4);
 	rbtree.insert(25);
 	rbtree.insert(11);
 	rbtree.insert(10);
 	rbtree.insert(5);
 	rbtree.insert(1);
-	rbtree.printTree();
 	cout << endl;
+	rbtree.insert(16);
+	rbtree.printTree();
 	rbtree.deleteVal(17);
 	cout << endl;
 	rbtree.printTree();
